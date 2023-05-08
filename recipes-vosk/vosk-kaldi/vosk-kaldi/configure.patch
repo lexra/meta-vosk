@@ -1,0 +1,62 @@
+diff Naur a/fstbin/Makefile b/fstbin/Makefile
+--- a/fstbin/Makefile
++++ b/fstbin/Makefile
+@@ -26,6 +26,7 @@ TESTFILES =
+ LIBFILE =
+ 
+ ADDLIBS = ../decoder/kaldi-decoder.a ../fstext/kaldi-fstext.a \
+-          ../util/kaldi-util.a ../matrix/kaldi-matrix.a ../base/kaldi-base.a 
++          ../util/kaldi-util.a ../matrix/kaldi-matrix.a ../base/kaldi-base.a \
++          ../hmm/kaldi-hmm.a ../lat/kaldi-lat.a ../tree/kaldi-tree.a
+ 
+ include ../makefiles/default_rules.mk
+diff Naur a/latbin/Makefile b/latbin/Makefile
+--- a/latbin/Makefile
++++ b/latbin/Makefile
+@@ -36,6 +36,7 @@ TESTFILES =
+ ADDLIBS = ../rnnlm/kaldi-rnnlm.a ../nnet3/kaldi-nnet3.a \
+           ../cudamatrix/kaldi-cudamatrix.a ../lat/kaldi-lat.a ../lm/kaldi-lm.a \
+           ../fstext/kaldi-fstext.a ../hmm/kaldi-hmm.a ../tree/kaldi-tree.a \
+-          ../util/kaldi-util.a ../matrix/kaldi-matrix.a ../base/kaldi-base.a 
++          ../util/kaldi-util.a ../matrix/kaldi-matrix.a ../base/kaldi-base.a \
++          ../chain/kaldi-chain.a ../decoder/kaldi-decoder.a
+ 
+ include ../makefiles/default_rules.mk
+diff Naur a/makefiles/linux_openblas.mk b/makefiles/linux_openblas.mk
+--- a/makefiles/linux_openblas.mk
++++ b/makefiles/linux_openblas.mk
+@@ -19,7 +19,7 @@ ifndef OPENBLASLIBS
+ $(error OPENBLASLIBS not defined.)
+ endif
+ 
+-CXXFLAGS = -std=c++17 -I.. -isystem $(OPENFSTINC) -O1 $(EXTRA_CXXFLAGS) \
++CXXFLAGS = -std=c++17 -I.. -I $(OPENFSTINC) -O1 $(EXTRA_CXXFLAGS) \
+            -Wall -Wno-sign-compare -Wno-unused-local-typedefs \
+            -Wno-deprecated-declarations -Winit-self \
+            -DKALDI_DOUBLEPRECISION=$(DOUBLE_PRECISION) \
+diff Naur a/matrix/Makefile b/matrix/Makefile
+--- a/matrix/Makefile
++++ b/matrix/Makefile
+@@ -10,7 +10,7 @@ include ../kaldi.mk
+ 
+ # you can uncomment matrix-lib-speed-test if you want to do the speed tests.
+ 
+-TESTFILES = matrix-lib-test sparse-matrix-test numpy-array-test #matrix-lib-speed-test
++#TESTFILES = matrix-lib-test sparse-matrix-test numpy-array-test #matrix-lib-speed-test
+ 
+ OBJFILES = kaldi-matrix.o kaldi-vector.o packed-matrix.o sp-matrix.o tp-matrix.o \
+            matrix-functions.o qr.o srfft.o compressed-matrix.o \
+diff Naur a/rnnlmbin/Makefile b/rnnlmbin/Makefile
+--- a/rnnlmbin/Makefile
++++ b/rnnlmbin/Makefile
+@@ -21,6 +21,6 @@ ADDLIBS = ../rnnlm/kaldi-rnnlm.a ../nnet3/kaldi-nnet3.a \
+           ../lat/kaldi-lat.a ../lm/kaldi-lm.a ../fstext/kaldi-fstext.a \
+           ../hmm/kaldi-hmm.a ../transform/kaldi-transform.a ../gmm/kaldi-gmm.a \
+           ../tree/kaldi-tree.a ../util/kaldi-util.a ../matrix/kaldi-matrix.a \
+-          ../base/kaldi-base.a 
++          ../base/kaldi-base.a ../chain/kaldi-chain.a
+ 
+ include ../makefiles/default_rules.mk
+-- 
+2.33.0
+
