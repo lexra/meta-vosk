@@ -21,21 +21,55 @@ inherit python3native
 
 ALLOW_EMPTY_${PN} = "1"
 
-PARALLEL_MAKE = "-j8"
+PARALLEL_MAKE = "-j 8"
 
 MYCONF = "--mathlib=OPENBLAS --shared --use-cuda=no --fst-root=${STAGING_INCDIR}/.. --fst-version=1.8.0 --openblas-root=${STAGING_INCDIR}/.. "
 
-# remove x86-specific optimizations
-do_configure:prepend:aarch64(){
-	cd ${S}
+do_configure:prepend:arm(){
 	sed -i -e "s#-msse -msse2##g" ${S}/makefiles/linux_openblas.mk
-	sed "951s|/lib/|/lib64/|" -i ${S}/configure
-	sed "952s|/lib/|/lib64/|" -i ${S}/configure
 	sed "s|^check_for_slow_expf;|#check_for_slow_expf;|" -i ${S}/configure
 }
 
-do_configure:prepend:arm(){
+do_configure:prepend:aarch64(){
 	sed -i -e "s#-msse -msse2##g" ${S}/makefiles/linux_openblas.mk
+	sed "s|^check_for_slow_expf;|#check_for_slow_expf;|" -i ${S}/configure
+}
+
+do_configure:prepend:smarc-rzg2l() {
+	sed "951s|OPENFSTLIBS=\"\$FSTROOT/lib/libfst.so\"$|OPENFSTLIBS=\"\$FSTROOT/lib64/libfst.so\"|" -i ${S}/configure
+	sed "952s|OPENFSTLDFLAGS=\"-Wl,-rpath=\${FSTROOT}/lib\"$|OPENFSTLDFLAGS=\"-Wl,-rpath=\${FSTROOT}/lib64\"|" -i ${S}/configure
+}
+do_configure:prepend:gnk-rzg2l() {
+	sed "951s|OPENFSTLIBS=\"\$FSTROOT/lib/libfst.so\"$|OPENFSTLIBS=\"\$FSTROOT/lib64/libfst.so\"|" -i ${S}/configure
+	sed "952s|OPENFSTLDFLAGS=\"-Wl,-rpath=\${FSTROOT}/lib\"$|OPENFSTLDFLAGS=\"-Wl,-rpath=\${FSTROOT}/lib64\"|" -i ${S}/configure
+}
+do_configure:prepend:smarc-rzv2l() {
+	sed "951s|OPENFSTLIBS=\"\$FSTROOT/lib/libfst.so\"$|OPENFSTLIBS=\"\$FSTROOT/lib64/libfst.so\"|" -i ${S}/configure
+	sed "952s|OPENFSTLDFLAGS=\"-Wl,-rpath=\${FSTROOT}/lib\"$|OPENFSTLDFLAGS=\"-Wl,-rpath=\${FSTROOT}/lib64\"|" -i ${S}/configure
+}
+do_configure:prepend:rzv2l-dev() {
+	sed "951s|OPENFSTLIBS=\"\$FSTROOT/lib/libfst.so\"$|OPENFSTLIBS=\"\$FSTROOT/lib64/libfst.so\"|" -i ${S}/configure
+	sed "952s|OPENFSTLDFLAGS=\"-Wl,-rpath=\${FSTROOT}/lib\"$|OPENFSTLDFLAGS=\"-Wl,-rpath=\${FSTROOT}/lib64\"|" -i ${S}/configure
+}
+do_configure:prepend:gnk-rzv2l() {
+	sed "951s|OPENFSTLIBS=\"\$FSTROOT/lib/libfst.so\"$|OPENFSTLIBS=\"\$FSTROOT/lib64/libfst.so\"|" -i ${S}/configure
+	sed "952s|OPENFSTLDFLAGS=\"-Wl,-rpath=\${FSTROOT}/lib\"$|OPENFSTLDFLAGS=\"-Wl,-rpath=\${FSTROOT}/lib64\"|" -i ${S}/configure
+}
+do_configure:prepend:hihope-rzg2h() {
+	sed "951s|OPENFSTLIBS=\"\$FSTROOT/lib/libfst.so\"$|OPENFSTLIBS=\"\$FSTROOT/lib64/libfst.so\"|" -i ${S}/configure
+	sed "952s|OPENFSTLDFLAGS=\"-Wl,-rpath=\${FSTROOT}/lib\"$|OPENFSTLDFLAGS=\"-Wl,-rpath=\${FSTROOT}/lib64\"|" -i ${S}/configure
+}
+do_configure:prepend:hihope-rzg2m() {
+	sed "951s|OPENFSTLIBS=\"\$FSTROOT/lib/libfst.so\"$|OPENFSTLIBS=\"\$FSTROOT/lib64/libfst.so\"|" -i ${S}/configure
+	sed "952s|OPENFSTLDFLAGS=\"-Wl,-rpath=\${FSTROOT}/lib\"$|OPENFSTLDFLAGS=\"-Wl,-rpath=\${FSTROOT}/lib64\"|" -i ${S}/configure
+}
+do_configure:prepend:hihope-rzg2n() {
+	sed "951s|OPENFSTLIBS=\"\$FSTROOT/lib/libfst.so\"$|OPENFSTLIBS=\"\$FSTROOT/lib64/libfst.so\"|" -i ${S}/configure
+	sed "952s|OPENFSTLDFLAGS=\"-Wl,-rpath=\${FSTROOT}/lib\"$|OPENFSTLDFLAGS=\"-Wl,-rpath=\${FSTROOT}/lib64\"|" -i ${S}/configure
+}
+do_configure:prepend:ek874() {
+	sed "951s|OPENFSTLIBS=\"\$FSTROOT/lib/libfst.so\"$|OPENFSTLIBS=\"\$FSTROOT/lib64/libfst.so\"|" -i ${S}/configure
+	sed "952s|OPENFSTLDFLAGS=\"-Wl,-rpath=\${FSTROOT}/lib\"$|OPENFSTLDFLAGS=\"-Wl,-rpath=\${FSTROOT}/lib64\"|" -i ${S}/configure
 }
 
 do_configure() {
@@ -53,18 +87,12 @@ do_install() {
 	for i in lib/*.so ; do
 		install -m 0644 ${i} ${D}${libdir}/
 	done
-	#for i in */*.a ; do
-		#install -m 0644 ${i} ${D}${libdir}/
-	#done
-
 	for j in base chain decoder feat fstext gmm gst-plugin hmm itf ivector kws lat lm matrix nnet nnet2 nnet3 online online2 rnnlm sgmm2 tfrnnlm transform tree util cudadecoder cudadecoderbin cudafeat cudamatrix ; do
 		install -d ${D}${includedir}/kaldi/${j}
 		for i in ${j}/*.h ; do 
 			install -m 0644 ${i} ${D}${includedir}/kaldi/${j}/
 		done
 	done
-
-	# make sure we have the package vosk-kaldi
 	install -d ${D}/usr/share/kaldi
 	echo "This is vosk-kaldi" > ${D}/usr/share/kaldi/README
 }
@@ -75,3 +103,4 @@ FILES:${PN} += " \
 "
 ERROR_QA:remove = "rpaths"
 ERROR_QA:remove = "dev-elf"
+

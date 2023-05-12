@@ -24,25 +24,25 @@ DEPENDS += " \
 "
 
 RDEPENDS:${PN} += " \
-    python3-cffi \
-    python3-compression \
-    python3-core \
-    python3-datetime \
-    python3-json \
-    python3-logging \
-    python3-misc \
-    python3-multiprocessing \
-    python3-netclient \
-    python3-requests \
-    python3-tqdm \
-    python3-srt \
-    python3-charset-normalizer \
-    python3-sounddevice \
-    virtual/vosk-model \
+	python3-cffi \
+	python3-compression \
+	python3-core \
+	python3-datetime \
+	python3-json \
+	python3-logging \
+	python3-misc \
+	python3-multiprocessing \
+	python3-netclient \
+	python3-requests \
+	python3-tqdm \
+	python3-srt \
+	python3-charset-normalizer \
+	python3-sounddevice \
+	virtual/vosk-model \
 "
 
 do_install_ptest () {
-    install -d ${D}${PTEST_PATH}/tests
-    cp ${S}/example/test_simple.py ${D}${PTEST_PATH}/tests
-    cp ${S}/example/test.wav ${D}${PTEST_PATH}/tests
+	install -d ${D}${PTEST_PATH}/tests
+	cp ${S}/example/test_simple.py ${D}${PTEST_PATH}/tests
+	cp ${S}/example/test.wav ${D}${PTEST_PATH}/tests
 }

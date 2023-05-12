@@ -30,7 +30,7 @@ diff Naur a/makefiles/linux_openblas.mk b/makefiles/linux_openblas.mk
  endif
  
 -CXXFLAGS = -std=c++17 -I.. -isystem $(OPENFSTINC) -O1 $(EXTRA_CXXFLAGS) \
-+CXXFLAGS = -std=c++17 -I.. -I $(OPENFSTINC) -O1 $(EXTRA_CXXFLAGS) \
++CXXFLAGS = -std=c++17 -I.. -I$(OPENFSTINC) -O1 $(EXTRA_CXXFLAGS) \
             -Wall -Wno-sign-compare -Wno-unused-local-typedefs \
             -Wno-deprecated-declarations -Winit-self \
             -DKALDI_DOUBLEPRECISION=$(DOUBLE_PRECISION) \
