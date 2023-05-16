@@ -1,0 +1,24 @@
+diff -Naur a/c/test_vosk.c b/c/test_vosk.c
+--- a/c/test_vosk.c
++++ b/c/test_vosk.c
+@@ -1,15 +1,16 @@
+ #include <vosk_api.h>
+ #include <stdio.h>
+ 
+-int main() {
+-    FILE *wavin;
++int main(int argc, char *argv[]) {
++    FILE *wavin = 0;
+     char buf[3200];
+     int nread, final;
+ 
+-    VoskModel *model = vosk_model_new("model");
++    VoskModel *model = vosk_model_new("/usr/share/vosk/vosk-model-small-en-us-0.15");
+     VoskRecognizer *recognizer = vosk_recognizer_new(model, 16000.0);
+ 
+-    wavin = fopen("test.wav", "rb");
++    if (argc <= 1)	wavin = fopen("/usr/share/vosk/test.wav", "rb");
++    else		wavin = fopen(argv[1], "rb");
+     fseek(wavin, 44, SEEK_SET);
+     while (!feof(wavin)) {
+          nread = fread(buf, 1, sizeof(buf), wavin);
