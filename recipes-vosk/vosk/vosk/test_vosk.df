@@ -1,24 +1,56 @@
-diff -Naur a/c/test_vosk.c b/c/test_vosk.c
+diff Naur a/c/test_vosk.c b/c/test_vosk.c
 --- a/c/test_vosk.c
 +++ b/c/test_vosk.c
-@@ -1,15 +1,16 @@
- #include <vosk_api.h>
+@@ -1,26 +1,36 @@
+-#include <vosk_api.h>
  #include <stdio.h>
++#include <string.h>
++#include <assert.h>
++#include <vosk_api.h>
  
 -int main() {
 -    FILE *wavin;
-+int main(int argc, char *argv[]) {
-+    FILE *wavin = 0;
-     char buf[3200];
-     int nread, final;
+-    char buf[3200];
+-    int nread, final;
++#define SAMPLE_RATE	24000
  
 -    VoskModel *model = vosk_model_new("model");
-+    VoskModel *model = vosk_model_new("/usr/share/vosk/vosk-model-small-en-us-0.15");
-     VoskRecognizer *recognizer = vosk_recognizer_new(model, 16000.0);
+-    VoskRecognizer *recognizer = vosk_recognizer_new(model, 16000.0);
++int main(int argc, char *argv[]) {
++    FILE *wavin = stdin;
++    char buf[2 * SAMPLE_RATE] = {0};
++    char *p;
++    int nleft, nread, final;
++    VoskModel *model;
++    VoskRecognizer *recognizer;
  
 -    wavin = fopen("test.wav", "rb");
-+    if (argc <= 1)	wavin = fopen("/usr/share/vosk/test.wav", "rb");
-+    else		wavin = fopen(argv[1], "rb");
++    model = vosk_model_new("/usr/share/vosk/model/");
++    recognizer = vosk_recognizer_new(model, (float)SAMPLE_RATE);
++    if (argc > 1)
++        wavin = fopen(argv[1], "rb");
      fseek(wavin, 44, SEEK_SET);
      while (!feof(wavin)) {
-          nread = fread(buf, 1, sizeof(buf), wavin);
+-         nread = fread(buf, 1, sizeof(buf), wavin);
+-         final = vosk_recognizer_accept_waveform(recognizer, buf, nread);
+-         if (final) {
+-             printf("%s\n", vosk_recognizer_result(recognizer));
+-         } else {
+-             printf("%s\n", vosk_recognizer_partial_result(recognizer));
+-         }
++        p = buf, nleft = 2 * SAMPLE_RATE;
++        //while (nleft > 0) {
++            nread = fread(p, 1, nleft, wavin), assert(nread >= 0);
++        //    p += nread, nleft -= nread;
++        //}
++        final = vosk_recognizer_accept_waveform(recognizer, buf, sizeof(buf));
++        if (final) {
++            printf("%s\n", vosk_recognizer_final_result(recognizer));
++        } else {
++            printf("%s\n", vosk_recognizer_partial_result(recognizer));
++        }
+     }
+-    printf("%s\n", vosk_recognizer_final_result(recognizer));
+ 
+     vosk_recognizer_free(recognizer);
+     vosk_model_free(model);

@@ -1,7 +1,6 @@
 SUMMARY = "Lightweight wideband model 'en-us'"
 HOMEPAGE = "https://alphacephei.com/vosk/"
 LICENSE = "Apache-2.0"
-# LIC_URL = "${COMMON_LICENSE_DIR}/Apache-2.0"
 LIC_FILES_CHKSUM = "file://${WORKDIR}/models.md;beginline=32;endline=32;md5=bb5cd71a409da2b13fa3bcb67a3573d1"
 
 SRC_URI = " \
@@ -15,9 +14,12 @@ SRC_URI[license.sha256sum] = "69e091d43baae61f93c586d939ff7c1997415964621614add8
 
 do_install() {
 	install -d ${D}/usr/share/vosk
-	cp -R ${WORKDIR}/vosk-model-small-en-us-0.15/ ${D}/usr/share/vosk
+	cp -Rfv ${WORKDIR}/vosk-model-small-en-us-0.15/ ${D}/usr/share/vosk
 }
 
-FILES:${PN} += " /usr/share/vosk  /usr/share/vosk/vosk-model-small-en-us-0.15 "
+FILES:${PN} += " \
+	/usr/share/vosk \
+	/usr/share/vosk/vosk-model-small-en-us-0.15 \ 
+"
 
 RPROVIDES:${PN} += "virtual/vosk-model"

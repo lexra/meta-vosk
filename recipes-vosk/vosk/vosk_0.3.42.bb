@@ -6,7 +6,11 @@ LIC_FILES_CHKSUM = "file://../COPYING;md5=d09bbd7a3746b6052fbd78b26a87396b"
 SRC_URI = " \
 	git://github.com/alphacep/vosk-api;protocol=https;branch=master \
 	file://0001-Build-fixes-for-shared-library-under-bitbake.patch \
+	file://makefile.test_vosk \
+	file://test_speech*.c \
 	file://test_vosk.df \
+	file://lyrics.wav \
+	file://test_microphone \
 "
 
 PV = "0.3.42+git${SRCPV}"
@@ -14,7 +18,8 @@ SRCREV = "b1b216d4c87d708935f1601287fe502aa11ee4a9"
 
 S = "${WORKDIR}/git/src"
 
-DEPENDS += " vosk-kaldi vosk-openfst openblas"
+#DEPENDS += " vosk-kaldi vosk-openfst openblas alsa-utils"
+DEPENDS += " vosk-kaldi vosk-openfst alsa-utils"
 
 RDEPENDS:${PN} += " \
 "
@@ -27,16 +32,21 @@ do_configure() {
 }
 
 do_compile_prepend() {
+	cp -fv ${WORKDIR}/makefile.test_vosk ${WORKDIR}/git/c/Makefile
+	cp -fv ${WORKDIR}/test_speech*.c ${WORKDIR}/git/c
+
 	git -C ${WORKDIR}/git checkout c/test_vosk.c
 	patch -p1 -l -f --fuzz 3 -d ${WORKDIR}/git -i ${WORKDIR}/test_vosk.df
-
-	sed 's|gcc |\$(CC) |' -i ../c/Makefile
 }
 
 do_compile() {
-	make KALDI_ROOT=${STAGING_INCDIR}/kaldi/ OPENFST_ROOT=${STAGING_INCDIR} OPENBLAS_ROOT=${STAGING_INCDIR} USE_SHARED=1 EXTRA_CFLAGS="${CFLAGS}" EXTRA_LDFLAGS="${LDFLAGS}" \
+	make -C ${S} \
+		KALDI_ROOT=${STAGING_INCDIR}/kaldi \
+		OPENFST_ROOT=${STAGING_INCDIR} \
+		OPENBLAS_ROOT=${STAGING_INCDIR} \
+		USE_SHARED=1 EXTRA_CFLAGS="${CFLAGS}" EXTRA_LDFLAGS="${LDFLAGS}" \
 		${PARALLEL_MAKE}
-	make -C ../c
+	make -C ${S}/../c
 }
 
 do_install(){
@@ -55,9 +65,12 @@ do_install(){
 
 	install -d ${D}${bindir}
 	install -m 0755 ${WORKDIR}/git/c/test_vosk ${D}${bindir}
+	install -m 0755 ${WORKDIR}/git/c/test_speech_en ${D}${bindir}
+	install -m 0755 ${WORKDIR}/git/c/test_speech_zh ${D}${bindir}
+	install -m 0755 ${WORKDIR}/test_microphone ${D}${bindir}
 
 	install -d install -d ${D}${prefix}/share/vosk
-	install -m 644 ${WORKDIR}/git/python/example/test.wav ${D}${prefix}/share/vosk
+	install -m 644 ${WORKDIR}/lyrics.wav ${D}${prefix}/share/vosk
 }
 
 INSANE_SKIP_${PN} = "ldflags"
