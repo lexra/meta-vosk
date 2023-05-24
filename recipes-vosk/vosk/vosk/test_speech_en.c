@@ -114,7 +114,7 @@ WAIT:
 	if (final)
 		printf("%s\n", vosk_recognizer_final_result(recognizer));
 	else
-		printf("%%s\n", vosk_recognizer_partial_result(recognizer));
+		printf("%s\n", vosk_recognizer_partial_result(recognizer));
 
 	goto WAIT;
 
