@@ -30,6 +30,7 @@ static char buffer[BUFFER_SIZE * RING_NUMBER] = {0};
 
 static void *CaptureThread(void *param) {
 	int err = 0, i;
+	char buf[BUFFER_SIZE] = {0};
 
 	pthread_mutex_lock(&mCaptured);
 	pthread_cleanup_push(pthread_mutex_unlock, (void *)&mCaptured);
@@ -37,13 +38,13 @@ static void *CaptureThread(void *param) {
 	pthread_cleanup_pop(1);
 
 	for (;;) {
-		pthread_mutex_lock(&mCaptured);
-		pthread_cleanup_push(pthread_mutex_unlock, (void *)&mCaptured);
+		//pthread_mutex_lock(&mCaptured);
+		//pthread_cleanup_push(pthread_mutex_unlock, (void *)&mCaptured);
 		i = idx;
-		pthread_cleanup_pop(1);
-
+		//pthread_cleanup_pop(1);
 		i++, i %= RING_NUMBER;
-		err = snd_pcm_readi (capture_handle, buffer + i * BUFFER_SIZE, BUFFER_FRAMES), assert(BUFFER_FRAMES == err);
+		err = snd_pcm_readi (capture_handle, buf, BUFFER_FRAMES), assert(BUFFER_FRAMES == err);
+		memcpy(buffer + (i * BUFFER_SIZE), buf, BUFFER_SIZE);
 
 		pthread_mutex_lock(&mCaptured);
 		pthread_cleanup_push(pthread_mutex_unlock, (void *)&mCaptured);

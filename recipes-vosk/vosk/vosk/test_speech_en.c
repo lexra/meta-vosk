@@ -22,7 +22,7 @@ static pthread_mutex_t mCaptured = PTHREAD_MUTEX_INITIALIZER;
 
 #define BUFFER_FRAMES	(SAMPLE_RATE / 10)
 #define BUFFER_SIZE	(BUFFER_FRAMES * 16 / 8)
-#define RING_NUMBER	5
+#define RING_NUMBER	12
 
 static snd_pcm_t *capture_handle = 0;
 static int idx = RING_NUMBER - 1;
@@ -30,6 +30,7 @@ static char buffer[BUFFER_SIZE * RING_NUMBER] = {0};
 
 static void *CaptureThread(void *param) {
 	int err = 0, i;
+	char buf[BUFFER_SIZE] = {0};
 
 	pthread_mutex_lock(&mCaptured);
 	pthread_cleanup_push(pthread_mutex_unlock, (void *)&mCaptured);
@@ -37,13 +38,13 @@ static void *CaptureThread(void *param) {
 	pthread_cleanup_pop(1);
 
 	for (;;) {
-		pthread_mutex_lock(&mCaptured);
-		pthread_cleanup_push(pthread_mutex_unlock, (void *)&mCaptured);
+		//pthread_mutex_lock(&mCaptured);
+		//pthread_cleanup_push(pthread_mutex_unlock, (void *)&mCaptured);
 		i = idx;
-		pthread_cleanup_pop(1);
-
+		//pthread_cleanup_pop(1);
 		i++, i %= RING_NUMBER;
-		err = snd_pcm_readi (capture_handle, buffer + i * BUFFER_SIZE, BUFFER_FRAMES), assert(BUFFER_FRAMES == err);
+		err = snd_pcm_readi (capture_handle, buf, BUFFER_FRAMES), assert(BUFFER_FRAMES == err);
+		memcpy(buffer + (i * BUFFER_SIZE), buf, BUFFER_SIZE);
 
 		pthread_mutex_lock(&mCaptured);
 		pthread_cleanup_push(pthread_mutex_unlock, (void *)&mCaptured);
@@ -108,9 +109,9 @@ WAIT:
 	pCaptured = 0;
 	pthread_cleanup_pop(1);
 
-	clock_gettime(CLOCK_REALTIME, &spec), o  = spec.tv_sec * 1000LL + spec.tv_nsec / 1000000;
+	//clock_gettime(CLOCK_REALTIME, &spec), o  = spec.tv_sec * 1000LL + spec.tv_nsec / 1000000;
 	final = vosk_recognizer_accept_waveform(recognizer, buf, BUFFER_SIZE);
-	clock_gettime(CLOCK_REALTIME, &spec), n  = spec.tv_sec * 1000LL + spec.tv_nsec / 1000000;
+	//clock_gettime(CLOCK_REALTIME, &spec), n  = spec.tv_sec * 1000LL + spec.tv_nsec / 1000000;
 	if (final)
 		printf("%s\n", vosk_recognizer_final_result(recognizer));
 	else
