@@ -6,7 +6,7 @@ LIC_FILES_CHKSUM = "file://../COPYING;md5=d09bbd7a3746b6052fbd78b26a87396b"
 SRC_URI = " \
 	git://github.com/alphacep/vosk-api;protocol=https;branch=master \
 	file://0001-Build-fixes-for-shared-library-under-bitbake.patch \
-	file://makefile.test_vosk \
+	file://makefile \
 	file://list.h \
 	file://test_speech*.c \
 	file://test_vosk.df \
@@ -33,7 +33,7 @@ do_configure() {
 }
 
 do_compile_prepend() {
-	cp -fv ${WORKDIR}/makefile.test_vosk ${WORKDIR}/git/c/Makefile
+	cp -fv ${WORKDIR}/makefile ${WORKDIR}/git/c/Makefile
 	cp -fv ${WORKDIR}/list.h ${WORKDIR}/git/c
 	cp -fv ${WORKDIR}/test_speech*.c ${WORKDIR}/git/c
 
