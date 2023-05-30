@@ -32,10 +32,10 @@ static void *CaptureThread(void *param) {
 	int err = 0, i;
 	char buf[BUFFER_SIZE] = {0};
 
-	pthread_mutex_lock(&mCaptured);
-	pthread_cleanup_push(pthread_mutex_unlock, (void *)&mCaptured);
+	//pthread_mutex_lock(&mCaptured);
+	//pthread_cleanup_push(pthread_mutex_unlock, (void *)&mCaptured);
 	idx = RING_NUMBER - 1;
-	pthread_cleanup_pop(1);
+	//pthread_cleanup_pop(1);
 
 	for (;;) {
 		//pthread_mutex_lock(&mCaptured);
@@ -88,6 +88,7 @@ int main (int argc, char *argv[]) {
 	snd_pcm_hw_params_free (hw_params);
 	err = snd_pcm_prepare (capture_handle), assert(0 == err);
 
+	pthread_cond_init(&cCaptured, NULL); usleep(1);
 	pthread_create(&tCapture, NULL, CaptureThread, 0);
 WAIT:
 	pthread_mutex_lock(&mCaptured);
