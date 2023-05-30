@@ -7,6 +7,7 @@ SRC_URI = " \
 	git://github.com/alphacep/vosk-api;protocol=https;branch=master \
 	file://0001-Build-fixes-for-shared-library-under-bitbake.patch \
 	file://makefile.test_vosk \
+	file://list.h \
 	file://test_speech*.c \
 	file://test_vosk.df \
 	file://lyrics.wav \
@@ -33,6 +34,7 @@ do_configure() {
 
 do_compile_prepend() {
 	cp -fv ${WORKDIR}/makefile.test_vosk ${WORKDIR}/git/c/Makefile
+	cp -fv ${WORKDIR}/list.h ${WORKDIR}/git/c
 	cp -fv ${WORKDIR}/test_speech*.c ${WORKDIR}/git/c
 
 	git -C ${WORKDIR}/git checkout c/test_vosk.c
@@ -65,6 +67,7 @@ do_install(){
 
 	install -d ${D}${bindir}
 	install -m 0755 ${WORKDIR}/git/c/test_vosk ${D}${bindir}
+	install -m 0755 ${WORKDIR}/git/c/test_speech ${D}${bindir}
 	install -m 0755 ${WORKDIR}/git/c/test_speech_en ${D}${bindir}
 	install -m 0755 ${WORKDIR}/git/c/test_speech_zh ${D}${bindir}
 	install -m 0755 ${WORKDIR}/test_microphone ${D}${bindir}
