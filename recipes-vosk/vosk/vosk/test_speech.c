@@ -11,6 +11,7 @@
 #include <pthread.h>
 #include <alsa/asoundlib.h>
 #include <sys/times.h>
+#include <sys/stat.h>
 #include <vosk_api.h>
 #include "list.h"
 
@@ -23,7 +24,7 @@ static pthread_mutex_t mCaptured = PTHREAD_MUTEX_INITIALIZER;
 
 #define BUFFER_FRAMES	(SAMPLE_RATE / 5)
 #define BUFFER_SIZE	(BUFFER_FRAMES * 16 / 8)
-#define RING_NUMBER	64
+#define RING_NUMBER	32
 
 static snd_pcm_t *capture_handle = 0;
 
@@ -38,11 +39,9 @@ static void *CaptureThread(void *param) {
 	char buf[BUFFER_SIZE] = {0};
 	struct pool_t *e;
 	struct list_head *pos, *q;
-	int wait_empty = 0;
 
 	for (;;) {
 		err = snd_pcm_readi (capture_handle, buf, BUFFER_FRAMES), assert(BUFFER_FRAMES == err);
-
 		pthread_mutex_lock(&mCaptured);
 		pthread_cleanup_push(pthread_mutex_unlock, (void *)&mCaptured);
 		n = 0;
@@ -53,6 +52,12 @@ static void *CaptureThread(void *param) {
 			e = (struct pool_t *)malloc(sizeof(struct pool_t));
 			memcpy(e->c, buf, BUFFER_SIZE);
 			list_add_tail(&e->list, &pl.list);
+		} else {
+			list_for_each_safe(pos, q, &pl.list) {
+				e = list_entry(pos, struct pool_t, list);
+				list_del(pos);
+				free(e);
+			}
 		}
 		pCaptured = 1;
 		pthread_cond_signal(&cCaptured);
@@ -67,17 +72,26 @@ int main (int argc, char *argv[]) {
 	snd_pcm_hw_params_t *hw_params;
 	snd_pcm_format_t format = SND_PCM_FORMAT_S16_LE;
 	VoskModel *model;
+	char pathname[256] = {0};
 	VoskRecognizer *recognizer;
 	int final;
-	char buf[BUFFER_SIZE * RING_NUMBER] = {0};
+	char buf[BUFFER_SIZE * RING_NUMBER];
+	struct stat lbuf;
 
 	int n = 0;
 	struct pool_t *e;
 	struct list_head *pos, *q;
 
-	if (argc == 1)			model = vosk_model_new("/usr/share/vosk/vosk-model-small-en-us-0.15");
-	else				model = vosk_model_new("/usr/share/vosk/vosk-model-small-cn-0.22");
+	strcpy(pathname, "/usr/share/vosk/vosk-model-small-en-us-0.15");
+	if (argc > 1)
+		strcpy(pathname, argv[1]);
+	if (0 != stat(pathname, &lbuf))
+		printf("Model not found!! \n"), exit(1);
+
+	model = vosk_model_new(pathname);
 	recognizer = vosk_recognizer_new(model, (float)SAMPLE_RATE);
+	memset(buf, 0xff, sizeof(buf));
+	//vosk_recognizer_accept_waveform(recognizer, buf, rate * 16 / 8);
 
 	system("amixer cset name='Left Input Mixer L2 Switch' on");
 	system("amixer cset name='Right Input Mixer R2 Switch' on");
@@ -110,7 +124,8 @@ int main (int argc, char *argv[]) {
 	pthread_cond_init(&cCaptured, NULL);
 	usleep(1);
 	pthread_create(&tCapture, NULL, CaptureThread, 0);
-WAIT:
+
+AGAIN:
 	pthread_mutex_lock(&mCaptured);
 	pthread_cleanup_push(pthread_mutex_unlock, (void *)&mCaptured);
 	while (0 == pCaptured)
@@ -119,29 +134,18 @@ WAIT:
 	list_for_each_safe(pos, q, &pl.list) {
 		e = list_entry(pos, struct pool_t, list);
 		memcpy(buf + n * BUFFER_SIZE, &e->c, BUFFER_SIZE);
-		list_del(pos), free(e);
+		list_del(pos); free(e);
 		n++;
 	}
 	pCaptured = 0;
 	pthread_cleanup_pop(1);
 
-	if (n >= RING_NUMBER)		goto WAIT;
-#if 0
-	for (i = 0; i < n; i++) {
-		final = vosk_recognizer_accept_waveform(recognizer, buf + i * BUFFER_SIZE, BUFFER_SIZE);
-		if (final)
-			printf("%s\n", vosk_recognizer_final_result(recognizer));
-		else
-			printf("%s\n", vosk_recognizer_partial_result(recognizer));
-	}
-#else
+	if (0 == n)
+		goto AGAIN;
 	final = vosk_recognizer_accept_waveform(recognizer, buf, n * BUFFER_SIZE);
-	if (final)
-		printf("%s\n", vosk_recognizer_final_result(recognizer));
-	else
-		printf("%s\n", vosk_recognizer_partial_result(recognizer));
-#endif
-	goto WAIT;
+	if (final)	printf("%s\n", vosk_recognizer_final_result(recognizer));
+	else		printf("%s\n", vosk_recognizer_partial_result(recognizer));
+	goto AGAIN;
 
 	vosk_recognizer_free(recognizer);
 	vosk_model_free(model);
