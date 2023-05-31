@@ -15,16 +15,17 @@
 #include <vosk_api.h>
 #include "list.h"
 
+#define MODEL_PREFIX	"/usr/share/vosk"
+
 #define SAMPLE_RATE     24000
+#define BUFFER_FRAMES	(SAMPLE_RATE / 5)
+#define BUFFER_SIZE	(BUFFER_FRAMES * 16 / 8)
+#define RING_NUMBER	32
 
 static pthread_t tCapture = 0;
 static pthread_cond_t cCaptured;
 static int pCaptured = 0;
 static pthread_mutex_t mCaptured = PTHREAD_MUTEX_INITIALIZER;
-
-#define BUFFER_FRAMES	(SAMPLE_RATE / 5)
-#define BUFFER_SIZE	(BUFFER_FRAMES * 16 / 8)
-#define RING_NUMBER	32
 
 static snd_pcm_t *capture_handle = 0;
 
@@ -82,9 +83,9 @@ int main (int argc, char *argv[]) {
 	struct pool_t *e;
 	struct list_head *pos, *q;
 
-	strcpy(pathname, "/usr/share/vosk/vosk-model-small-en-us-0.15");
+	sprintf(pathname, "%s/%s", MODEL_PREFIX, "vosk-model-small-en-us-0.15");
 	if (argc > 1)
-		strcpy(pathname, argv[1]);
+		sprintf(pathname, "%s/%s", MODEL_PREFIX, argv[1]);
 	if (0 != stat(pathname, &lbuf))
 		printf("Model not found!! \n"), exit(1);
 
