@@ -10,8 +10,9 @@ SRC_URI = " \
 	file://list.h \
 	file://test_speech*.c \
 	file://test_vosk.df \
-	file://lyrics.wav \
 	file://test_microphone \
+	file://stress.mp4 \
+	file://stress.wav \
 "
 
 PV = "0.3.42+git${SRCPV}"
@@ -73,7 +74,8 @@ do_install(){
 	install -m 0755 ${WORKDIR}/test_microphone ${D}${bindir}
 
 	install -d install -d ${D}${prefix}/share/vosk
-	install -m 644 ${WORKDIR}/lyrics.wav ${D}${prefix}/share/vosk
+	install -m 644 ${WORKDIR}/stress.wav ${D}${prefix}/share/vosk
+	install -m 644 ${WORKDIR}/stress.mp4 ${D}${prefix}/share/vosk
 }
 
 INSANE_SKIP_${PN} = "ldflags"
