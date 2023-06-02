@@ -32,18 +32,19 @@ def map_bits(d):
     elif re.match('aarch64$', arch): return 64
     return 32
 
+#BUILD_WITHOUT_LAPACK=ON
+
 EXTRA_OEMAKE = "\
-    BUILD_WITHOUT_LAPACK=OFF \
-    HOSTCC=${BUILD_CC} \
-    CROSS=1 \
-    CROSS_SUFFIX=${TARGET_PREFIX} \
-    BINARY=${@map_bits(d)} \
-    TARGET=${@map_arch(d)} \
-    OPENBLAS_LIBRARY_DIR=${D}${libdir} \
-    DYNAMIC_ARCH=ON \
-    BUILD_STATIC_LIBS=ON \
-    USE_LOCKING=1 \
-    USE_THREAD=0 \
+	HOSTCC=${BUILD_CC} \
+	CROSS=1 \
+	CROSS_SUFFIX=${TARGET_PREFIX} \
+	BINARY=${@map_bits(d)} \
+	TARGET=${@map_arch(d)} \
+	OPENBLAS_LIBRARY_DIR=${D}${libdir} \
+	DYNAMIC_ARCH=ON \
+	BUILD_STATIC_LIBS=ON \
+	USE_LOCKING=1 \
+	USE_THREAD=1 \
 "
 
 do_install() {
