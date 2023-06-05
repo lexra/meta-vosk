@@ -26,12 +26,11 @@ static pthread_t tCapture = 0;
 static pthread_cond_t cCaptured;
 static int pCaptured = 0;
 static pthread_mutex_t mCaptured = PTHREAD_MUTEX_INITIALIZER;
-
 static snd_pcm_t *capture_handle = 0;
 
 struct pool_t {
-    struct list_head list;
-    char c[BUFFER_SIZE];
+	struct list_head list;
+	char *c;
 };
 static struct pool_t pl;
 
@@ -41,8 +40,12 @@ static void *CaptureThread(void *param) {
 	struct pool_t *e;
 	struct list_head *pos, *q;
 
+	static int I = 0;
+	static char RingBuffer[BUFFER_SIZE * RING_NUMBER];
+
 	for (;;) {
 		err = snd_pcm_readi (capture_handle, buf, BUFFER_FRAMES), assert(BUFFER_FRAMES == err);
+
 		pthread_mutex_lock(&mCaptured);
 		pthread_cleanup_push(pthread_mutex_unlock, (void *)&mCaptured);
 		n = 0;
@@ -51,14 +54,15 @@ static void *CaptureThread(void *param) {
 		}
 		if (n < RING_NUMBER) {
 			e = (struct pool_t *)malloc(sizeof(struct pool_t));
+			e->c = RingBuffer + (I * BUFFER_SIZE), I++, I %= RING_NUMBER;
 			memcpy(e->c, buf, BUFFER_SIZE);
 			list_add_tail(&e->list, &pl.list);
 		} else {
-			list_for_each_safe(pos, q, &pl.list) {
-				e = list_entry(pos, struct pool_t, list);
-				list_del(pos);
-				free(e);
-			}
+			//list_for_each_safe(pos, q, &pl.list) {
+			//	e = list_entry(pos, struct pool_t, list);
+			//	list_del(pos);
+			//	free(e);
+			//}
 		}
 		pCaptured = 1;
 		pthread_cond_signal(&cCaptured);
@@ -94,11 +98,11 @@ int main (int argc, char *argv[]) {
 	memset(buf, 0xff, sizeof(buf));
 	//vosk_recognizer_accept_waveform(recognizer, buf, rate * 16 / 8);
 
-	system("amixer cset name='Left Input Mixer L2 Switch' on");
-	system("amixer cset name='Right Input Mixer R2 Switch' on");
-	system("amixer cset name='Headphone Playback Volume' 100%");
-	system("amixer cset name='PCM Volume' 100%");
-	system("amixer cset name='Input PGA Volume' 100%");
+	err = system("amixer cset name='Left Input Mixer L2 Switch' on");
+	err = system("amixer cset name='Right Input Mixer R2 Switch' on");
+	err = system("amixer cset name='Headphone Playback Volume' 100%");
+	err = system("amixer cset name='PCM Volume' 100%");
+	err = system("amixer cset name='Input PGA Volume' 100%");
 
 	err = snd_pcm_open (&capture_handle, "default", SND_PCM_STREAM_CAPTURE, 0), assert(0 == err);
 	fprintf(stdout, "audio interface opened\n");
@@ -134,7 +138,7 @@ AGAIN:
 	n = 0;
 	list_for_each_safe(pos, q, &pl.list) {
 		e = list_entry(pos, struct pool_t, list);
-		memcpy(buf + n * BUFFER_SIZE, &e->c, BUFFER_SIZE);
+		memcpy(buf + n * BUFFER_SIZE, e->c, BUFFER_SIZE);
 		list_del(pos); free(e);
 		n++;
 	}
