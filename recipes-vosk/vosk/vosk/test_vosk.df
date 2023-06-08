@@ -25,7 +25,7 @@ diff Naur a/c/test_vosk.c b/c/test_vosk.c
 +    VoskRecognizer *recognizer;
  
 -    wavin = fopen("test.wav", "rb");
-+    model = vosk_model_new("/usr/share/vosk/model/");
++    model = vosk_model_new("/usr/share/vosk/vosk-model-small-en-us-0.15");
 +    recognizer = vosk_recognizer_new(model, (float)SAMPLE_RATE);
 +    if (argc > 1)
 +        wavin = fopen(argv[1], "rb");

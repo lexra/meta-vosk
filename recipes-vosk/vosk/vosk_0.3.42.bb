@@ -8,7 +8,7 @@ SRC_URI = " \
 	file://0001-Build-fixes-for-shared-library-under-bitbake.patch \
 	file://makefile \
 	file://list.h \
-	file://test_speech*.c \
+	file://test_speech.c \
 	file://test_vosk.df \
 	file://test_microphone \
 	file://stress.mp4 \
@@ -20,8 +20,7 @@ SRCREV = "b1b216d4c87d708935f1601287fe502aa11ee4a9"
 
 S = "${WORKDIR}/git/src"
 
-#DEPENDS += " vosk-kaldi vosk-openfst openblas alsa-utils"
-DEPENDS += " vosk-kaldi vosk-openfst alsa-utils"
+DEPENDS += " vosk-kaldi vosk-openfst alsa-utils espeak speex"
 
 RDEPENDS:${PN} += " \
 "
@@ -36,7 +35,7 @@ do_configure() {
 do_compile_prepend() {
 	cp -fv ${WORKDIR}/makefile ${WORKDIR}/git/c/Makefile
 	cp -fv ${WORKDIR}/list.h ${WORKDIR}/git/c
-	cp -fv ${WORKDIR}/test_speech*.c ${WORKDIR}/git/c
+	cp -fv ${WORKDIR}/test_speech.c ${WORKDIR}/git/c
 
 	git -C ${WORKDIR}/git checkout c/test_vosk.c
 	patch -p1 -l -f --fuzz 3 -d ${WORKDIR}/git -i ${WORKDIR}/test_vosk.df
@@ -69,8 +68,6 @@ do_install(){
 	install -d ${D}${bindir}
 	install -m 0755 ${WORKDIR}/git/c/test_vosk ${D}${bindir}
 	install -m 0755 ${WORKDIR}/git/c/test_speech ${D}${bindir}
-	install -m 0755 ${WORKDIR}/git/c/test_speech_en ${D}${bindir}
-	install -m 0755 ${WORKDIR}/git/c/test_speech_zh ${D}${bindir}
 	install -m 0755 ${WORKDIR}/test_microphone ${D}${bindir}
 
 	install -d install -d ${D}${prefix}/share/vosk

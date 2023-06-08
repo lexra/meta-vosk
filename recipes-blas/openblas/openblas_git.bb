@@ -32,8 +32,6 @@ def map_bits(d):
     elif re.match('aarch64$', arch): return 64
     return 32
 
-#BUILD_WITHOUT_LAPACK=ON
-
 EXTRA_OEMAKE = "\
 	HOSTCC=${BUILD_CC} \
 	CROSS=1 \
@@ -41,22 +39,19 @@ EXTRA_OEMAKE = "\
 	BINARY=${@map_bits(d)} \
 	TARGET=${@map_arch(d)} \
 	OPENBLAS_LIBRARY_DIR=${D}${libdir} \
-	DYNAMIC_ARCH=ON \
-	BUILD_STATIC_LIBS=ON \
-	USE_LOCKING=1 \
 	USE_THREAD=1 \
+	USE_LOCKING=1 \
 "
 
 do_install() {
-    oe_runmake PREFIX=${D}${prefix} install
-    rm -rf ${D}${bindir} ${D}${libdir}/cmake
-    # fixup pkgconfig file
-    sed -i -e "s#libdir=/.*#libdir=${libdir}#" ${D}${libdir}/pkgconfig/openblas.pc
-    sed -i -e "s#includedir=/.*#includedir=${includedir}#" ${D}${libdir}/pkgconfig/openblas.pc
-
-    cat  ${D}${libdir}/pkgconfig/openblas.pc
+	oe_runmake PREFIX=${D}${prefix} install
+	rm -rf ${D}${bindir} ${D}${libdir}/cmake
+	# fixup pkgconfig file
+	sed -i -e "s#libdir=/.*#libdir=${libdir}#" ${D}${libdir}/pkgconfig/openblas.pc
+	sed -i -e "s#includedir=/.*#includedir=${includedir}#" ${D}${libdir}/pkgconfig/openblas.pc
+	cat ${D}${libdir}/pkgconfig/openblas.pc
 
 }
 
 FILES:${PN}-dev = "${includedir} ${libdir}/lib${PN}.so"
-FILES:${PN}     = "${libdir}/*"
+FILES:${PN} = "${libdir}/*"

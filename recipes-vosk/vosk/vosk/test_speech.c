@@ -18,9 +18,9 @@
 #define MODEL_PREFIX	"/usr/share/vosk"
 
 #define SAMPLE_RATE     24000
-#define BUFFER_FRAMES	(SAMPLE_RATE / 5)
+#define BUFFER_FRAMES	(SAMPLE_RATE / 10)
 #define BUFFER_SIZE	(BUFFER_FRAMES * 16 / 8)
-#define RING_NUMBER	32
+#define RING_NUMBER	128
 
 static pthread_t tCapture = 0;
 static pthread_cond_t cCaptured;
@@ -30,7 +30,8 @@ static snd_pcm_t *capture_handle = 0;
 
 struct pool_t {
 	struct list_head list;
-	char *c;
+	char *b;
+	int bsize;
 };
 static struct pool_t pl;
 
@@ -54,9 +55,11 @@ static void *CaptureThread(void *param) {
 		}
 		if (n < RING_NUMBER) {
 			e = (struct pool_t *)malloc(sizeof(struct pool_t));
-			e->c = RingBuffer + (I * BUFFER_SIZE), I++, I %= RING_NUMBER;
-			memcpy(e->c, buf, BUFFER_SIZE);
+			e->b = RingBuffer + (I * BUFFER_SIZE), I++, I %= RING_NUMBER;
+			memcpy(e->b, buf, BUFFER_SIZE), e->bsize = BUFFER_SIZE;
 			list_add_tail(&e->list, &pl.list);
+			pCaptured = 1;
+			pthread_cond_signal(&cCaptured);
 		} else {
 			//list_for_each_safe(pos, q, &pl.list) {
 			//	e = list_entry(pos, struct pool_t, list);
@@ -64,8 +67,6 @@ static void *CaptureThread(void *param) {
 			//	free(e);
 			//}
 		}
-		pCaptured = 1;
-		pthread_cond_signal(&cCaptured);
 		pthread_cleanup_pop(1);
 	}
 	snd_pcm_close (capture_handle);
@@ -94,7 +95,7 @@ int main (int argc, char *argv[]) {
 		printf("Model not found!! \n"), exit(1);
 
 	model = vosk_model_new(pathname);
-	recognizer = vosk_recognizer_new(model, (float)SAMPLE_RATE);
+	recognizer = vosk_recognizer_new(model, (float)rate);
 	memset(buf, 0xff, sizeof(buf));
 	//vosk_recognizer_accept_waveform(recognizer, buf, rate * 16 / 8);
 
@@ -138,15 +139,14 @@ AGAIN:
 	n = 0;
 	list_for_each_safe(pos, q, &pl.list) {
 		e = list_entry(pos, struct pool_t, list);
-		memcpy(buf + n * BUFFER_SIZE, e->c, BUFFER_SIZE);
+		memcpy(buf + (n * BUFFER_SIZE), e->b, BUFFER_SIZE);
 		list_del(pos); free(e);
 		n++;
 	}
 	pCaptured = 0;
 	pthread_cleanup_pop(1);
 
-	if (0 == n)
-		goto AGAIN;
+	if (0 == n)	goto AGAIN;
 	final = vosk_recognizer_accept_waveform(recognizer, buf, n * BUFFER_SIZE);
 	if (final)	printf("%s\n", vosk_recognizer_final_result(recognizer));
 	else		printf("%s\n", vosk_recognizer_partial_result(recognizer));
