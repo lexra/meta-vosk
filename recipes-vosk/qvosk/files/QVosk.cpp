@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <assert.h>
 #include "main.h"
 #include "QVosk.h"
 #include "MainDialog.h"
@@ -9,14 +10,13 @@ QVosk::QVosk(QObject *parent) : QThread(parent)
 
 void QVosk::run()
 {
-	int i, found;
-	int n, end;
+	int i;
+	int n, Final;
 	char buf[BUFFER_SIZE * RING_NUMBER];
 	struct pool_t *e;
 	struct list_head *pos, *q;
 	char out[4096] = {0};
 	char *p = 0;
-	QString result;
 
 AGAIN:
 	pthread_mutex_lock(&mCaptured);
@@ -34,18 +34,17 @@ AGAIN:
 	pthread_cleanup_pop(1);
 
 	if (0 == n)	goto AGAIN;
-	end = vosk_recognizer_accept_waveform(recognizer, buf, n * BUFFER_SIZE);
-	if (end)
+	Final = vosk_recognizer_accept_waveform(recognizer, buf, n * BUFFER_SIZE);
+	if (Final)
 		sprintf(out, "%s", vosk_recognizer_final_result(recognizer));
 	else
 		sprintf(out, "%s", vosk_recognizer_partial_result(recognizer));
 	p = out;
-	for (i = 0; i < (int)sizeof(out); i++) {
+	for (i = 0; i < sizeof(out); i++) {
 		if (out[i] == 123)	out[i] = 0, p = &out[i + 1];
 		if (out[i] == 125)	out[i] = 0;
 	}
-	result = p;
-	emit emitRecognize(end, result);
+	emit emitRecognize(Final, QString(static_cast<const char *>(p)));
 
 	goto AGAIN;
 	vosk_recognizer_free(recognizer);

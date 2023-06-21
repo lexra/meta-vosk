@@ -88,9 +88,9 @@ MainDialog::~MainDialog()
 }
 
 
-void MainDialog::onRecognize(int end, QString result) {
+void MainDialog::onRecognize(int Final, QString Result) {
         QPlainTextEdit *textEdit;
 
         textEdit = ui->textEdit;
-	textEdit->setPlainText(result);
+	textEdit->setPlainText(Result);
 }

@@ -14,7 +14,7 @@ public:
 protected:
 
 signals:
-	void emitRecognize(int end, QString message);
+	void emitRecognize(int Final, QString Message);
 };
 
 #endif // _QVOSK_H_

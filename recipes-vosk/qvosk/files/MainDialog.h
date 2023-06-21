@@ -25,7 +25,7 @@ public:
 	~MainDialog();
 
 public slots:
-	void onRecognize(int end, QString result);
+	void onRecognize(int Final, QString Result);
 
 protected:
 	QVosk *_thread;
