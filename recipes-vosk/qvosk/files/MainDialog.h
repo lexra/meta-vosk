@@ -34,6 +34,4 @@ private:
 	Ui::MainDialog *ui;
 };
 
-MainDialog *getMainDialog(void);
-
 #endif // _MAINDIALOG_H_

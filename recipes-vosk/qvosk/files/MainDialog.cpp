@@ -6,8 +6,6 @@
 #include "MainDialog.h"
 #include "ui_MainDialog.h"
 
-static MainDialog *dlg = 0;
-
 VoskRecognizer *recognizer = 0;
 VoskModel *model = 0;
 struct pool_t pl;
@@ -16,10 +14,6 @@ pthread_cond_t cCaptured;
 int pCaptured = 0;
 pthread_mutex_t mCaptured = PTHREAD_MUTEX_INITIALIZER;
 snd_pcm_t *capture_handle = 0;
-
-MainDialog *getMainDialog(void) {
-	return dlg;
-}
 
 static void *CaptureThread(void *param) {
 	int err = 0, i = 0, n = 0;
@@ -70,7 +64,6 @@ MainDialog::MainDialog(QWidget *parent) : QDialog(parent), ui(new Ui::MainDialog
 	textEdit = ui->textEdit;
 	textEdit->setReadOnly(true);
 	textEdit->setPlainText(QString(""));
-	dlg = this;
 
 	_thread = new QVosk(this);
 	connect(_thread, SIGNAL(emitRecognize(int, QString)), this, SLOT(onRecognize(int, QString)));
