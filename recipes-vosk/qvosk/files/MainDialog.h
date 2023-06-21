@@ -18,6 +18,8 @@ class MainDialog : public QDialog
 {
 	Q_OBJECT
 
+friend class QVosk;
+
 public:
 	explicit MainDialog(QWidget *parent = 0);
 	MainDialog(const MainDialog&) = delete;

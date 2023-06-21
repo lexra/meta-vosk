@@ -72,7 +72,7 @@ MainDialog::MainDialog(QWidget *parent) : QDialog(parent), ui(new Ui::MainDialog
 	pthread_cond_init(&cCaptured, NULL);
 	_thread->start();
 	sleep(1);
-	pthread_create(&tCapture, NULL, CaptureThread, 0);
+	pthread_create(&tCapture, NULL, CaptureThread, this);
 }
 
 MainDialog::~MainDialog()
