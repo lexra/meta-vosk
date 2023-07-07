@@ -2,6 +2,8 @@
 #include <unistd.h>
 #include <assert.h>
 #include <sys/stat.h>
+#include <iostream>
+
 #include "main.h"
 #include "MainDialog.h"
 #include "ui_MainDialog.h"
@@ -103,4 +105,5 @@ void MainDialog::onRecognize(int Final, QString Result)
 
 	textEdit = ui->textEdit;
 	textEdit->setPlainText(Result);
+	std::cout << Result.toStdString() << std::endl;
 }
