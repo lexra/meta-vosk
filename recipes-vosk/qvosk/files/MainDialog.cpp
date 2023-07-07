@@ -23,6 +23,22 @@ static void *CaptureThread(void *param) {
 
 	static int I = 0;
 	static char RingBuffer[BUFFER_SIZE * RING_NUMBER];
+	
+	unsigned int rate = SAMPLE_RATE;
+
+	snd_pcm_hw_params_t *hw_params;
+	snd_pcm_format_t format = SND_PCM_FORMAT_S16_LE;
+
+	err = snd_pcm_open (&capture_handle, "default", SND_PCM_STREAM_CAPTURE, 0), assert(0 == err);
+	err = snd_pcm_hw_params_malloc (&hw_params), assert(0 == err);
+	err = snd_pcm_hw_params_any (capture_handle, hw_params), assert(0 <= err);
+	err = snd_pcm_hw_params_set_access (capture_handle, hw_params, SND_PCM_ACCESS_RW_INTERLEAVED), assert(0 == err);
+	err = snd_pcm_hw_params_set_format (capture_handle, hw_params, format), assert(0 == err);
+	err = snd_pcm_hw_params_set_rate_near (capture_handle, hw_params, &rate, 0), assert(0 == err);
+	err = snd_pcm_hw_params_set_channels (capture_handle, hw_params, 1), assert(0 == err);
+	err = snd_pcm_hw_params (capture_handle, hw_params), assert(0 == err);
+	snd_pcm_hw_params_free (hw_params);
+	err = snd_pcm_prepare (capture_handle), assert(0 == err);
 
 	for (;;) {
 		err = snd_pcm_readi (capture_handle, buf, BUFFER_FRAMES), assert(BUFFER_FRAMES == err);
@@ -65,11 +81,11 @@ MainDialog::MainDialog(QWidget *parent) : QDialog(parent), ui(new Ui::MainDialog
 	textEdit->setReadOnly(true);
 	textEdit->setPlainText(QString(""));
 
-	_thread = new QVosk(this);
-	connect(_thread, SIGNAL(emitRecognize(int, QString)), this, SLOT(onRecognize(int, QString)));
-
 	INIT_LIST_HEAD(&pl.list);
 	pthread_cond_init(&cCaptured, NULL);
+
+	_thread = new QVosk(this);
+	connect(_thread, SIGNAL(emitRecognize(int, QString)), this, SLOT(onRecognize(int, QString)));
 	_thread->start();
 	sleep(1);
 	pthread_create(&tCapture, NULL, CaptureThread, this);
@@ -81,9 +97,10 @@ MainDialog::~MainDialog()
 }
 
 
-void MainDialog::onRecognize(int Final, QString Result) {
-        QPlainTextEdit *textEdit;
+void MainDialog::onRecognize(int Final, QString Result)
+{
+	QPlainTextEdit *textEdit;
 
-        textEdit = ui->textEdit;
+	textEdit = ui->textEdit;
 	textEdit->setPlainText(Result);
 }

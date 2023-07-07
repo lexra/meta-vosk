@@ -40,10 +40,10 @@ AGAIN:
 	else
 		sprintf(out, "%s", vosk_recognizer_partial_result(recognizer));
 	p = out;
-	for (i = 0; i < sizeof(out); i++) {
-		if (out[i] == 123)	out[i] = 0, p = &out[i + 1];
-		if (out[i] == 125)	out[i] = 0;
-	}
+	//for (i = 0; i < sizeof(out); i++) {
+	//	if (out[i] == 123)	out[i] = 0, p = &out[i + 1];
+	//	if (out[i] == 125)	out[i] = 0;
+	//}
 	emit emitRecognize(Final, QString(static_cast<const char *>(p)));
 
 	goto AGAIN;

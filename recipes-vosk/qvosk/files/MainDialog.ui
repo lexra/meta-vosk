@@ -22,7 +22,7 @@
      <property name="font">
       <font>
        <family>Arial</family>
-       <pointsize>16</pointsize>
+       <pointsize>27</pointsize>
       </font>
      </property>
      <property name="contextMenuPolicy">
@@ -44,21 +44,7 @@
       <number>1</number>
      </property>
      <property name="plainText">
-      <string>How do I get through one night without you\nIf I had to live without you
-What kinda life would that be
-Oh I, I need you in my arms, need you to hold
-You're my world, my heart, my soul
-If you ever leave
-Well, baby you would take away everything
-Good in my life
-And tell me now
-How do I live without you?
-I want to know
-How do I breathe without you?
-If you ever go
-How do I ever, ever survive
-How do I, how do I, oh how do I live
-</string>
+      <string>How do I get through one night without you\nIf I had to live without you</string>
      </property>
     </widget>
    </item>
