@@ -71,7 +71,6 @@ do_install(){
 
 	install -d install -d ${D}${prefix}/share/vosk
 	install -m 644 ${WORKDIR}/stress.wav ${D}${prefix}/share/vosk
-	install -m 644 ${WORKDIR}/stress.mp4 ${D}${prefix}/share/vosk
 }
 
 INSANE_SKIP_${PN} = "ldflags"
