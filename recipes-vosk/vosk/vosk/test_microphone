@@ -8,4 +8,4 @@ amixer cset name='Input PGA Volume' 100%
 
 [ -d /usr/share/vosk/vosk-model-small-en-us-0.15 -a ! -e /usr/share/vosk/model ] && ln -sf vosk-model-small-en-us-0.15 /usr/share/vosk/model
 [ 0 -ne `cat /usr/share/vosk/model/README | grep 'Chinese Vosk model' | wc -l` ] && export LC_ALL=zh_CN.utf8
-arecord -f S16_LE -r 24000 -t wav | test_vosk
+arecord -f S16_LE -r 16000 -t wav | test_vosk

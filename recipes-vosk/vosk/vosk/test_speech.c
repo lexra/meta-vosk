@@ -17,10 +17,10 @@
 
 #define MODEL_PREFIX	"/usr/share/vosk"
 
-#define SAMPLE_RATE     24000
+#define SAMPLE_RATE     16000
 #define BUFFER_FRAMES	(SAMPLE_RATE / 10)
 #define BUFFER_SIZE	(BUFFER_FRAMES * 16 / 8)
-#define RING_NUMBER	128
+#define RING_NUMBER	64
 
 static pthread_t tCapture = 0;
 static pthread_cond_t cCaptured;
@@ -97,13 +97,14 @@ int main (int argc, char *argv[]) {
 	model = vosk_model_new(pathname);
 	recognizer = vosk_recognizer_new(model, (float)rate);
 	memset(buf, 0xff, sizeof(buf));
-	//vosk_recognizer_accept_waveform(recognizer, buf, rate * 16 / 8);
 
+#if 1
 	err = system("amixer cset name='Left Input Mixer L2 Switch' on");
 	err = system("amixer cset name='Right Input Mixer R2 Switch' on");
 	err = system("amixer cset name='Headphone Playback Volume' 100%");
-	err = system("amixer cset name='PCM Volume' 100%");
-	err = system("amixer cset name='Input PGA Volume' 100%");
+	err = system("amixer cset name='PCM Volume' 90%");
+	err = system("amixer cset name='Input PGA Volume' 50%");
+#endif
 
 	err = snd_pcm_open (&capture_handle, "default", SND_PCM_STREAM_CAPTURE, 0), assert(0 == err);
 	fprintf(stdout, "audio interface opened\n");

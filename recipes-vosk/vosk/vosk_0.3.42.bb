@@ -11,7 +11,6 @@ SRC_URI = " \
 	file://test_speech.c \
 	file://test_vosk.df \
 	file://test_microphone \
-	file://stress.mp4 \
 	file://stress.wav \
 "
 

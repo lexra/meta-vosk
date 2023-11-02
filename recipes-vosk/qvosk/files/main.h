@@ -8,10 +8,10 @@
 
 #define MODEL_PREFIX	"/usr/share/vosk"
 
-#define SAMPLE_RATE     24000
+#define SAMPLE_RATE     16000
 #define BUFFER_FRAMES	(SAMPLE_RATE / 10)
 #define BUFFER_SIZE	(BUFFER_FRAMES * 16 / 8)
-#define RING_NUMBER	128
+#define RING_NUMBER	64
 
 struct pool_t {
         struct list_head list;
