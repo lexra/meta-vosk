@@ -1,4 +1,4 @@
-FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
 
 SUMMARY = "Kaldi Speech Recognition Toolkit"
 HOMEPAGE = "http://kaldi-asr.org/"
@@ -19,18 +19,23 @@ S = "${WORKDIR}/git/src"
 DEPENDS += "openblas vosk-openfst"
 inherit python3native
 
-ALLOW_EMPTY_${PN} = "1"
+ALLOW_EMPTY:${PN} = "1"
 
 PARALLEL_MAKE = "-j 8"
 
 MYCONF = "--mathlib=OPENBLAS --shared --use-cuda=no --fst-root=${STAGING_INCDIR}/.. --fst-version=1.8.0 --openblas-root=${STAGING_INCDIR}/.. "
 
-do_configure:prepend:arm(){
+do_configure:prepend:arm() {
 	sed -i -e "s#-msse -msse2##g" ${S}/makefiles/linux_openblas.mk
 	sed "s|^check_for_slow_expf;|#check_for_slow_expf;|" -i ${S}/configure
 }
 
-do_configure:prepend:aarch64(){
+do_configure:prepend:cortexa73() {
+	sed -i -e "s#-msse -msse2##g" ${S}/makefiles/linux_openblas.mk
+	sed "s|^check_for_slow_expf;|#check_for_slow_expf;|" -i ${S}/configure
+}
+
+do_configure:prepend:aarch64() {
 	sed -i -e "s#-msse -msse2##g" ${S}/makefiles/linux_openblas.mk
 	sed "s|^check_for_slow_expf;|#check_for_slow_expf;|" -i ${S}/configure
 }
@@ -39,34 +44,42 @@ do_configure:prepend:smarc-rzg2l() {
 	sed "951s|OPENFSTLIBS=\"\$FSTROOT/lib/libfst.so\"$|OPENFSTLIBS=\"\$FSTROOT/lib64/libfst.so\"|" -i ${S}/configure
 	sed "952s|OPENFSTLDFLAGS=\"-Wl,-rpath=\${FSTROOT}/lib\"$|OPENFSTLDFLAGS=\"-Wl,-rpath=\${FSTROOT}/lib64\"|" -i ${S}/configure
 }
+
 do_configure:prepend:gnk-rzg2l() {
 	sed "951s|OPENFSTLIBS=\"\$FSTROOT/lib/libfst.so\"$|OPENFSTLIBS=\"\$FSTROOT/lib64/libfst.so\"|" -i ${S}/configure
 	sed "952s|OPENFSTLDFLAGS=\"-Wl,-rpath=\${FSTROOT}/lib\"$|OPENFSTLDFLAGS=\"-Wl,-rpath=\${FSTROOT}/lib64\"|" -i ${S}/configure
 }
+
 do_configure:prepend:smarc-rzv2l() {
 	sed "951s|OPENFSTLIBS=\"\$FSTROOT/lib/libfst.so\"$|OPENFSTLIBS=\"\$FSTROOT/lib64/libfst.so\"|" -i ${S}/configure
 	sed "952s|OPENFSTLDFLAGS=\"-Wl,-rpath=\${FSTROOT}/lib\"$|OPENFSTLDFLAGS=\"-Wl,-rpath=\${FSTROOT}/lib64\"|" -i ${S}/configure
 }
+
 do_configure:prepend:rzv2l-dev() {
 	sed "951s|OPENFSTLIBS=\"\$FSTROOT/lib/libfst.so\"$|OPENFSTLIBS=\"\$FSTROOT/lib64/libfst.so\"|" -i ${S}/configure
 	sed "952s|OPENFSTLDFLAGS=\"-Wl,-rpath=\${FSTROOT}/lib\"$|OPENFSTLDFLAGS=\"-Wl,-rpath=\${FSTROOT}/lib64\"|" -i ${S}/configure
 }
+
 do_configure:prepend:gnk-rzv2l() {
 	sed "951s|OPENFSTLIBS=\"\$FSTROOT/lib/libfst.so\"$|OPENFSTLIBS=\"\$FSTROOT/lib64/libfst.so\"|" -i ${S}/configure
 	sed "952s|OPENFSTLDFLAGS=\"-Wl,-rpath=\${FSTROOT}/lib\"$|OPENFSTLDFLAGS=\"-Wl,-rpath=\${FSTROOT}/lib64\"|" -i ${S}/configure
 }
+
 do_configure:prepend:hihope-rzg2h() {
 	sed "951s|OPENFSTLIBS=\"\$FSTROOT/lib/libfst.so\"$|OPENFSTLIBS=\"\$FSTROOT/lib64/libfst.so\"|" -i ${S}/configure
 	sed "952s|OPENFSTLDFLAGS=\"-Wl,-rpath=\${FSTROOT}/lib\"$|OPENFSTLDFLAGS=\"-Wl,-rpath=\${FSTROOT}/lib64\"|" -i ${S}/configure
 }
+
 do_configure:prepend:hihope-rzg2m() {
 	sed "951s|OPENFSTLIBS=\"\$FSTROOT/lib/libfst.so\"$|OPENFSTLIBS=\"\$FSTROOT/lib64/libfst.so\"|" -i ${S}/configure
 	sed "952s|OPENFSTLDFLAGS=\"-Wl,-rpath=\${FSTROOT}/lib\"$|OPENFSTLDFLAGS=\"-Wl,-rpath=\${FSTROOT}/lib64\"|" -i ${S}/configure
 }
+
 do_configure:prepend:hihope-rzg2n() {
 	sed "951s|OPENFSTLIBS=\"\$FSTROOT/lib/libfst.so\"$|OPENFSTLIBS=\"\$FSTROOT/lib64/libfst.so\"|" -i ${S}/configure
 	sed "952s|OPENFSTLDFLAGS=\"-Wl,-rpath=\${FSTROOT}/lib\"$|OPENFSTLDFLAGS=\"-Wl,-rpath=\${FSTROOT}/lib64\"|" -i ${S}/configure
 }
+
 do_configure:prepend:ek874() {
 	sed "951s|OPENFSTLIBS=\"\$FSTROOT/lib/libfst.so\"$|OPENFSTLIBS=\"\$FSTROOT/lib64/libfst.so\"|" -i ${S}/configure
 	sed "952s|OPENFSTLDFLAGS=\"-Wl,-rpath=\${FSTROOT}/lib\"$|OPENFSTLDFLAGS=\"-Wl,-rpath=\${FSTROOT}/lib64\"|" -i ${S}/configure
@@ -93,14 +106,13 @@ do_install() {
 			install -m 0644 ${i} ${D}${includedir}/kaldi/${j}/
 		done
 	done
-	install -d ${D}/usr/share/kaldi
-	echo "This is vosk-kaldi" > ${D}/usr/share/kaldi/README
+	install -d ${D}${datadir}/kaldi
+	echo "This is vosk-kaldi" > ${D}${datadir}/kaldi/README
 }
 
-FILES:${PN} += " \
-	/usr/share/kaldi \
-	/usr/share/kaldi/README \
-"
+FILES:${PN} += " ${datadir}/kaldi"
+FILES:${PN}-dev += " ${datadir}/kaldi"
+
 ERROR_QA:remove = "rpaths"
 ERROR_QA:remove = "dev-elf"
 
