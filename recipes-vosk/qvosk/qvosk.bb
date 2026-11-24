@@ -1,4 +1,4 @@
-FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 LICENSE = "CLOSED"
 
 DEPENDS = " \
@@ -8,11 +8,12 @@ DEPENDS = " \
 	alsa-lib \
 "
 
-inherit qmake5
+#inherit qmake5
+inherit qt6-qmake
 
 S = "${WORKDIR}"
 
-SRC_URI_append = " \
+SRC_URI:append = " \
 	file://qvosk.pro \
 	file://MainDialog.ui \
 	file://list.h \
@@ -32,3 +33,8 @@ do_install() {
         install -d ${D}${bindir}
         install -m 755 ${WORKDIR}/build/qvosk ${D}${bindir}
 }
+
+FILES:${PN} = "${bindir}"
+FILES:${PN}-dev = "${bindir}"
+
+INSANE_SKIP:${PN} += " dev-deps"
