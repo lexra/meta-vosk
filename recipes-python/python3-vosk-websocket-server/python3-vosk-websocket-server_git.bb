@@ -15,7 +15,6 @@ RDEPENDS:${PN} += " \
     vosk \
     python3-vosk-api \
     python3-websockets \
-    virtual/vosk-model \
 "
 
 do_configure () {
