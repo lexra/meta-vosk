@@ -31,7 +31,7 @@ do_configure() {
 	:
 }
 
-do_compile_prepend() {
+do_compile:prepend() {
 	cp -fv ${WORKDIR}/makefile ${WORKDIR}/git/c/Makefile
 	cp -fv ${WORKDIR}/list.h ${WORKDIR}/git/c
 	cp -fv ${WORKDIR}/test_speech.c ${WORKDIR}/git/c
@@ -50,7 +50,7 @@ do_compile() {
 	make -C ${S}/../c
 }
 
-do_install(){
+do_install() {
 	cd ${WORKDIR}/git/src
 	install -d ${D}${libdir}
 	install -m 0644 libvosk.so.0.3.42 ${D}${libdir}
@@ -69,11 +69,15 @@ do_install(){
 	install -m 0755 ${WORKDIR}/git/c/test_speech ${D}${bindir}
 	install -m 0755 ${WORKDIR}/test_microphone ${D}${bindir}
 
-	install -d install -d ${D}${prefix}/share/vosk
-	install -m 644 ${WORKDIR}/stress.wav ${D}${prefix}/share/vosk
+	install -d install -d ${D}${datadir}/vosk
+	install -m 644 ${WORKDIR}/stress.wav ${D}${datadir}/vosk
 }
+
+FILES:${PN} = "${bindir} ${includedir} ${libdir} ${datadir}"
+FILES:${PN}-dev = "${bindir} ${includedir} ${libdir} ${datadir}"
 
 INSANE_SKIP_${PN} = "ldflags"
 INSANE_SKIP_${PN}-dev = "ldflags"
 
 ERROR_QA:remove = "dev-deps"
+ERROR_QA:remove = "ldflags"
