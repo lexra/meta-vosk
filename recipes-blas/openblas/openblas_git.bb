@@ -5,7 +5,7 @@ LICENSE = "BSD-3-Clause"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=5adf4792c949a00013ce25d476a2abc0"
 
 SRC_URI = "\
-    git://github.com/xianyi/OpenBLAS;protocol=https;branch=develop \
+	git://github.com/xianyi/OpenBLAS;protocol=https;branch=develop \
 "
 
 # tag 0.3.20
@@ -53,5 +53,10 @@ do_install() {
 
 }
 
-FILES:${PN}-dev = "${includedir} ${libdir}/lib${PN}.so"
-FILES:${PN} = "${libdir}/*"
+FILES:${PN} = "${includedir} ${libdir} /usr/lib/fst"
+FILES:${PN}-dev = "${includedir} ${libdir} /usr/lib/fst"
+
+INSANE_SKIP:${PN} += " dev-elf"
+INSANE_SKIP:${PN}-dev += " dev-elf"
+
+ERROR_QA:remove = "dev-elf"
