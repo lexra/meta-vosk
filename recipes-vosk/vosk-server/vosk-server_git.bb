@@ -29,7 +29,8 @@ do_install () {
 	cp websocket-cpp/vosk-websocket-cpp ${D}${bindir}
 }
 
-RDEPENDS:${PN} += "virtual/vosk-model"
-
 INSANE_SKIP_${PN} += " ldflags "
 INSANE_SKIP_${PN}-dev += " ldflags "
+
+FILES:${PN} = "${bindir}"
+FILES:${PN}-dev = "${bindir}"
