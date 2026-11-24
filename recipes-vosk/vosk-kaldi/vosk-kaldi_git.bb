@@ -16,7 +16,7 @@ SRCREV = "a25f216f5ce4eec5e45a6ab7651e20c9840a05cd"
 
 S = "${WORKDIR}/git/src"
 
-DEPENDS += "openblas vosk-openfst"
+DEPENDS += "libeigen openblas vosk-openfst"
 inherit python3native
 
 ALLOW_EMPTY:${PN} = "1"
@@ -26,11 +26,6 @@ PARALLEL_MAKE = "-j 8"
 MYCONF = "--mathlib=OPENBLAS --shared --use-cuda=no --fst-root=${STAGING_INCDIR}/.. --fst-version=1.8.0 --openblas-root=${STAGING_INCDIR}/.. "
 
 do_configure:prepend:arm() {
-	sed -i -e "s#-msse -msse2##g" ${S}/makefiles/linux_openblas.mk
-	sed "s|^check_for_slow_expf;|#check_for_slow_expf;|" -i ${S}/configure
-}
-
-do_configure:prepend:cortexa73() {
 	sed -i -e "s#-msse -msse2##g" ${S}/makefiles/linux_openblas.mk
 	sed "s|^check_for_slow_expf;|#check_for_slow_expf;|" -i ${S}/configure
 }
@@ -92,7 +87,7 @@ do_configure() {
 }
 
 do_compile() {
-	oe_runmake SDKTARGETSYSROOT=${STAGING_DIR_TARGET} ${PARALLEL_MAKE}
+	oe_runmake SDKTARGETSYSROOT=${STAGING_DIR_TARGET} EXTRA_CXXFLAGS=" -I${STAGING_DIR_TARGET}/usr/include/eigen3/Eigen/src/misc" ${PARALLEL_MAKE}
 }
 
 do_install() {
@@ -115,4 +110,3 @@ FILES:${PN}-dev += " ${datadir}/kaldi"
 
 ERROR_QA:remove = "rpaths"
 ERROR_QA:remove = "dev-elf"
-
