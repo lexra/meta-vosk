@@ -17,6 +17,10 @@ EXTRA_OECONF = "--enable-static --enable-shared --enable-far --enable-ngram-fsts
 
 INSANE_SKIP_${PN} += " installed-vs-shipped "
 INSANE_SKIP_${PN}-dev += " installed-vs-shipped "
+INSANE_SKIP:${PN} += " dev-elf"
+INSANE_SKIP:${PN}-dev += " dev-elf"
 
 FILES:${PN} += " ${libdir}/fst"
 FILES:${PN}-dev += " ${libdir}/fst"
+
+ERROR_QA:remove = "dev-elf"
