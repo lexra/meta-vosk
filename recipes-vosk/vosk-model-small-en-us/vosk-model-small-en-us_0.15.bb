@@ -48,5 +48,3 @@ FILES:${PN}-small-cn = " \
 
 RPROVIDES:${PN}-small-en-us += "vosk-model-small-en-us"
 RPROVIDES:${PN}-small-cn += "vosk-model-small-cn"
-
-RPROVIDES:${PN} += "virtual/vosk-model"

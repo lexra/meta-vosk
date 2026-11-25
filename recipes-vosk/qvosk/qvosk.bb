@@ -34,7 +34,4 @@ do_install() {
         install -m 755 ${WORKDIR}/build/qvosk ${D}${bindir}
 }
 
-FILES:${PN} = "${bindir}"
-FILES:${PN}-dev = "${bindir}"
-
 INSANE_SKIP:${PN} += " dev-deps"
